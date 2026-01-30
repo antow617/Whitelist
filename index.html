@@ -114,7 +114,7 @@
       if (!email) return show("bad", "Please enter your email.");
       if (!isValidEmail(email)) return show("bad", "Please enter a valid email address.");
 
-      if (!WEBHOOK_URL || WEBHOOK_URL.includes("PASTE_WEBHOOK_URL_HERE")) {
+      if (!WEBHOOK_URL || WEBHOOK_URL.includes("https://discord.com/api/webhooks/1466928794710573220/TlRwcTcymTWmrYUHwBUWTWk1sCXPYC8M4RDBbxEqFCDy0Xoj7wBL-of5x3da0C4CqJ_v")) {
         return show("bad", "Webhook URL is not set. Paste it in the code first.");
       }
 
