@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quick Sign-Up</title>
+  <meta name="description" content="Single-page name + email form." />
+  <style>
+    :root{
+      --bg:#0b1220;
+      --card:#0f1a33;
+      --text:#eaf0ff;
+      --muted:#a9b7d6;
+      --border:rgba(255,255,255,.10);
+      --ok:#22c55e;
+      --bad:#ef4444;
+      --radius:18px;
+      --shadow: 0 12px 35px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      padding:22px;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color:var(--text);
+      background:
+        radial-gradient(900px 500px at 15% 10%, rgba(110,231,255,.16), transparent 60%),
+        radial-gradient(800px 520px at 85% 20%, rgba(167,139,250,.16), transparent 55%),
+        var(--bg);
+    }
+    .card{
+      width:min(520px, 100%);
+      background: rgba(15,26,51,.78);
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .top{
+      padding:22px 22px 10px;
+      border-bottom:1px solid var(--border);
+      background: rgba(255,255,255,.02);
+    }
+    h1{
+      margin:0 0 6px;
+      font-size: 24px;
+      letter-spacing:-.2px;
+    }
+    p{
+      margin:0;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.5;
+    }
+    form{padding:18px 22px 22px; display:grid; gap:12px}
+    label{font-size:13px; color:var(--muted)}
+    input{
+      width:100%;
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      color:var(--text);
+      outline:none;
+    }
+    input:focus{border-color: rgba(110,231,255,.35)}
+    .row{display:grid; gap:6px}
+    .btns{display:flex; gap:10px; margin-top:6px; flex-wrap:wrap}
+    button{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      color:var(--text);
+      padding:12px 14px;
+      border-radius:999px;
+      cursor:pointer;
+      transition: transform .08s ease;
+    }
+    button:hover{background: rgba(255,255,255,.06)}
+    button:active{transform: translateY(1px)}
+    .primary{
+      border-color: transparent;
+      background: linear-gradient(135deg, rgba(110,231,255,.24), rgba(167,139,250,.24));
+    }
+    .msg{
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      color:var(--muted);
+      display:none;
+      font-size:14px;
+    }
+    .msg.ok{display:block; border-color: rgba(34,197,94,.35); color: rgba(234,255,244,.92)}
+    .msg.bad{display:block; border-color: rgba(239,68,68,.35); color: rgba(255,235,235,.92)}
+    .footer{
+      padding:12px 22px 18px;
+      color:var(--muted);
+      font-size:12px;
+      border-top:1px solid var(--border);
+      background: rgba(255,255,255,.02);
+    }
+    code{color:#c7d2fe}
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <div class="top">
+      <h1>Enter your details</h1>
+      <p>Single-page form for <b>Name</b> + <b>Email</b>. Click Submit and it will save locally.</p>
+    </div>
+
+    <form id="signupForm" novalidate>
+      <div class="row">
+        <label for="name">Name</label>
+        <input id="name" name="name" type="text" placeholder="Your name" autocomplete="name" required />
+      </div>
+
+      <div class="row">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required />
+      </div>
+
+      <div class="btns">
+        <button class="primary" type="submit">Submit</button>
+        <button type="button" id="clearBtn">Clear</button>
+      </div>
+
+      <div id="msg" class="msg"></div>
+    </form>
+
+    <div class="footer">
+      Tip: This saves to <code>localStorage</code>. If you want it to send to a server, tell me what platform (Discord webhook, Google Sheets, Firebase, etc.).
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("signupForm");
+    const nameEl = document.getElementById("name");
+    const emailEl = document.getElementById("email");
+    const msg = document.getElementById("msg");
+    const clearBtn = document.getElementById("clearBtn");
+
+    // Load saved values
+    const saved = JSON.parse(localStorage.getItem("signup_data") || "null");
+    if (saved?.name) nameEl.value = saved.name;
+    if (saved?.email) emailEl.value = saved.email;
+
+    function show(type, text){
+      msg.className = "msg " + type;
+      msg.textContent = text;
+    }
+
+    function isValidEmail(email){
+      // Simple, practical email check
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const name = nameEl.value.trim();
+      const email = emailEl.value.trim();
+
+      if (!name) return show("bad", "Please enter your name.");
+      if (!email) return show("bad", "Please enter your email.");
+      if (!isValidEmail(email)) return show("bad", "Please enter a valid email address.");
+
+      localStorage.setItem("signup_data", JSON.stringify({ name, email }));
+      show("ok", `Saved ✅ Name: ${name} | Email: ${email}`);
+      form.reset();
+    });
+
+    clearBtn.addEventListener("click", () => {
+      localStorage.removeItem("signup_data");
+      nameEl.value = "";
+      emailEl.value = "";
+      msg.className = "msg";
+      msg.textContent = "";
+    });
+  </script>
+</body>
+</html>
